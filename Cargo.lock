@@ -632,7 +632,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
-name = "lcs-diff-server"
+name = "lcs-png-diff"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "156c6982f81faeef8e32c4ade23bc6a4ab330a59d88772c417de10698dc1eb9d"
+dependencies = [
+ "base64",
+ "clap",
+ "image",
+ "rusty_pool",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "lcs-png-diff-server"
 version = "0.1.0"
 dependencies = [
  "axum",
@@ -650,20 +664,6 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "uuid",
-]
-
-[[package]]
-name = "lcs-png-diff"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "156c6982f81faeef8e32c4ade23bc6a4ab330a59d88772c417de10698dc1eb9d"
-dependencies = [
- "base64",
- "clap",
- "image",
- "rusty_pool",
- "serde",
- "serde_json",
 ]
 
 [[package]]
