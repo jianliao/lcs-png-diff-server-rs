@@ -2,6 +2,21 @@
 name = "lcs-png-diff-server"
 version = "0.1.0"
 edition = "2021"
+documentation = "https://github.com/jianliao/lcs-png-diff-server-rs"
+homepage = "https://github.com/jianliao/lcs-png-diff-server-rs"
+repository = "https://github.com/jianliao/lcs-png-diff-server-rs"
+license = "Apache 2"
+readme ="README.md"
+authors = ["Jian Liao <jian.liao@gmail.com>"]
+description = "PNG diff server with LCS algorithm"
+keywords = [
+  "PNG",
+  "Bitmap",
+  "lcs"
+]
+exclude = [
+  ".gitignore"
+]
 
 [features]
 default = ["binary"]
