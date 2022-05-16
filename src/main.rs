@@ -9,6 +9,7 @@ use clap::Parser;
 use image::{io::Reader, DynamicImage, ImageError};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use tokio::signal;
 use std::{
     env,
     error::Error,
@@ -68,6 +69,7 @@ async fn main() {
 
     axum::Server::bind(&sock_addr)
         .serve(app.into_make_service())
+        .with_graceful_shutdown(shutdown_signal())
         .await
         .expect("Unable to start server");
 }
@@ -164,4 +166,30 @@ impl IntoResponse for AppError {
 
         (status, body).into_response()
     }
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+
+    println!("signal received, starting graceful shutdown");
 }
