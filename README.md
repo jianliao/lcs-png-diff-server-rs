@@ -1,7 +1,29 @@
 # lcs-png-diff-server
 Pass in before and after bitmap URL, then the server will generate lcs diff png and return the diff result URL in response.
 
-## Example
+## Server start options
+
+### Start server
+
+``` bash
+lcs-png-diff-server
+```
+or
+``` bash
+docker run --rm -it -p 8080:8080 docker-adobe-spectrum-release.dr.corp.adobe.com/lcs-png-diff-server:latest
+```
+
+### Customize response URL
+
+``` bash
+HOST_INFO=https://localhost:443/ lcs-png-diff-server 
+```
+or
+``` bash
+docker run --rm -it -e HOST_INFO=https://localhost:443/ -p 8080:8080 docker-adobe-spectrum-release.dr.corp.adobe.com/lcs-png-diff-server:latest
+```
+
+## Example Request and Response
 
 ### Request payload
 

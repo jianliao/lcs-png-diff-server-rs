@@ -8,8 +8,9 @@ use axum_extra::routing::SpaRouter;
 use clap::Parser;
 use image::{io::Reader, DynamicImage, ImageError};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
+use serde_json::{json, Value};
 use std::{
+    env,
     error::Error,
     io::Cursor,
     net::{IpAddr, Ipv6Addr, SocketAddr},
@@ -26,11 +27,11 @@ use uuid::Uuid;
 )]
 struct Opt {
     /// set the log level
-    #[clap(short = 'l', long = "log", default_value = "debug")]
+    #[clap(short = 'l', long = "log", default_value = "info")]
     log_level: String,
 
     /// set the listen addr
-    #[clap(short = 'a', long = "addr", default_value = "::1")]
+    #[clap(short = 'a', long = "addr", default_value = "0.0.0.0")]
     addr: String,
 
     /// set the listen port
@@ -44,7 +45,7 @@ struct Opt {
 
 #[tokio::main]
 async fn main() {
-    let opt = Opt::parse();
+    let opt: Opt = Opt::parse();
 
     // Setup logging & RUST_LOG from args
     if std::env::var("RUST_LOG").is_err() {
@@ -53,17 +54,17 @@ async fn main() {
     // enable console logging
     tracing_subscriber::fmt::init();
 
-    let app = Router::new()
+    let app: Router = Router::new()
         .route("/api/diff", post(diff))
         .merge(SpaRouter::new("/assets", opt.static_dir))
         .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()));
 
-    let sock_addr = SocketAddr::from((
-        IpAddr::from_str(opt.addr.as_str()).unwrap_or(IpAddr::V6(Ipv6Addr::LOCALHOST)),
+    let sock_addr: SocketAddr = SocketAddr::from((
+        IpAddr::from_str(opt.addr.as_str()).unwrap_or(IpAddr::V6(Ipv6Addr::UNSPECIFIED)),
         opt.port,
     ));
 
-    log::info!("listening on http://{}", sock_addr);
+    log::info!("LCS Diff server listening on http://{}", sock_addr);
 
     axum::Server::bind(&sock_addr)
         .serve(app.into_make_service())
@@ -100,12 +101,21 @@ async fn diff(Json(payload): Json<Diff>) -> Result<Json<DiffResult>, AppError> {
     let result: DynamicImage = lcs_png_diff::diff(&before, &after).unwrap();
 
     let result_file: String = format!("{}{}{}", "assets/", Uuid::new_v4(), ".png");
+
     result.save(&result_file)?;
 
-    log::info!("Generate diff result at {}", result_file);
+    log::info!(
+        "{}{}{} Generating diff bitmap at {}",
+        '\u{1F31F}',
+        '\u{1F31F}',
+        '\u{1F31F}',
+        result_file
+    );
+
+    let host_info: String = env::var("HOST_INFO").unwrap_or(String::from("http://localhost:8080/"));
 
     Ok(Json(DiffResult {
-        result_url: format!("{}{}", "http://localhost:8080/", result_file),
+        result_url: format!("{}{}", host_info, result_file),
     }))
 }
 
@@ -117,19 +127,22 @@ enum AppError {
 }
 
 impl From<reqwest::Error> for AppError {
-    fn from(_: reqwest::Error) -> Self {
+    fn from(inner: reqwest::Error) -> Self {
+        log::error!("{}{}{} {}", '\u{203C}', '\u{203C}', '\u{203C}', inner);
         AppError::InputNotFound
     }
 }
 
 impl From<ImageError> for AppError {
-    fn from(_: ImageError) -> Self {
+    fn from(inner: ImageError) -> Self {
+        log::error!("{}{}{} {}", '\u{203C}', '\u{203C}', '\u{203C}', inner);
         AppError::UnsupportedBitmapFormat
     }
 }
 
 impl From<Box<dyn Error>> for AppError {
-    fn from(_: Box<dyn Error>) -> Self {
+    fn from(inner: Box<dyn Error>) -> Self {
+        log::error!("{}{}{} {}", '\u{203C}', '\u{203C}', '\u{203C}', inner);
         AppError::UnknownError
     }
 }
@@ -142,13 +155,10 @@ impl IntoResponse for AppError {
                 StatusCode::UNSUPPORTED_MEDIA_TYPE,
                 "Only supports image/png",
             ),
-            AppError::UnknownError => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Unknown internal server error",
-            ),
+            AppError::UnknownError => (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error"),
         };
 
-        let body = Json(json!({
+        let body: Json<Value> = Json(json!({
             "error": error_message,
         }));
 
