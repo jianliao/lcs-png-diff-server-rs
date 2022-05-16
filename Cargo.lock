@@ -647,7 +647,7 @@ dependencies = [
 
 [[package]]
 name = "lcs-png-diff-server"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "axum",
  "axum-extra",
