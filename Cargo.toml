@@ -12,7 +12,7 @@ description = "PNG diff server with LCS algorithm"
 keywords = [
   "PNG",
   "Bitmap",
-  "lcs"
+  "LCS"
 ]
 exclude = [
   ".gitignore"

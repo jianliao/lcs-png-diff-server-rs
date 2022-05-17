@@ -1,7 +1,7 @@
 SHELL=bash
 
 tag=latest
-registry=docker-adobe-spectrum-release.dr.corp.adobe.com
+registry=jianliao
 repository=lcs-png-diff-server
 
 build-image:

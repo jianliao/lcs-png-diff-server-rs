@@ -10,7 +10,7 @@ lcs-png-diff-server
 ```
 or
 ``` bash
-docker run --rm -it -p 8080:8080 docker-adobe-spectrum-release.dr.corp.adobe.com/lcs-png-diff-server:latest
+docker run --rm -it -p 8080:8080 jianliao/lcs-png-diff-server:latest
 ```
 
 ### Customize response URL
@@ -20,7 +20,7 @@ HOST_INFO=https://localhost:443/ lcs-png-diff-server
 ```
 or
 ``` bash
-docker run --rm -it -e HOST_INFO=https://localhost:443/ -p 8080:8080 docker-adobe-spectrum-release.dr.corp.adobe.com/lcs-png-diff-server:latest
+docker run --rm -it -e HOST_INFO=https://localhost:443/ -p 8080:8080 jianliao/lcs-png-diff-server:latest
 ```
 
 ## Example Request and Response

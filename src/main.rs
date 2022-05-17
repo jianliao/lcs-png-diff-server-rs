@@ -204,5 +204,5 @@ async fn shutdown_signal() {
         _ = terminate => {},
     }
 
-    println!("signal received, starting graceful shutdown");
+    println!(" signal received, starting graceful shutdown");
 }
