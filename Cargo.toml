@@ -27,6 +27,7 @@ all_image_formats = ["image/png"]
 axum = "0.5.5"
 axum-extra = { version = "0.3.1", features = ["spa"] }
 clap = { version = "3.1.18", features = ["derive"] }
+http = "0.2.7"
 image = { version = "0.24.2", default-features = false }
 lcs-png-diff = "0.1.0"
 log = "0.4.17"

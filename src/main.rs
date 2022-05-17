@@ -6,10 +6,10 @@ use axum::{
 };
 use axum_extra::routing::SpaRouter;
 use clap::Parser;
+use http::Method;
 use image::{io::Reader, DynamicImage, ImageError};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use tokio::signal;
 use std::{
     env,
     error::Error,
@@ -17,7 +17,9 @@ use std::{
     net::{IpAddr, Ipv6Addr, SocketAddr},
     str::FromStr,
 };
+use tokio::signal;
 use tower::ServiceBuilder;
+use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 use uuid::Uuid;
 
@@ -55,10 +57,21 @@ async fn main() {
     // enable console logging
     tracing_subscriber::fmt::init();
 
+    // Support CORS for GET and POST
+    let cors = CorsLayer::new()
+        // allow `GET` and `POST` when accessing the resource
+        .allow_methods(vec![Method::GET, Method::POST])
+        // allow requests from any origin
+        .allow_origin(Any);
+
     let app: Router = Router::new()
         .route("/api/diff", post(diff))
         .merge(SpaRouter::new("/assets", opt.static_dir))
-        .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()));
+        .layer(
+            ServiceBuilder::new()
+                .layer(TraceLayer::new_for_http())
+                .layer(cors),
+        );
 
     let sock_addr: SocketAddr = SocketAddr::from((
         IpAddr::from_str(opt.addr.as_str()).unwrap_or(IpAddr::V6(Ipv6Addr::UNSPECIFIED)),
