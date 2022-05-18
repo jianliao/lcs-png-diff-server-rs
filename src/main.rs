@@ -25,8 +25,8 @@ use uuid::Uuid;
 
 #[derive(Parser, Debug)]
 #[clap(
-    name = "lcs-diff-server",
-    about = "A server for generating diff bitmap from png files"
+    name = "lcs-png-diff-server",
+    about = "A server for generating diff bitmaps from png files"
 )]
 struct Opt {
     /// set the log level
