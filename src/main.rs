@@ -7,9 +7,9 @@ use axum::{
 use axum_extra::routing::SpaRouter;
 use clap::Parser;
 use http::Method;
-use image::{io::Reader, DynamicImage, ImageError};
+use image::{io::Reader, ImageError};
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::json;
 use std::{
     env,
     error::Error,
@@ -48,7 +48,7 @@ struct Opt {
 
 #[tokio::main]
 async fn main() {
-    let opt: Opt = Opt::parse();
+    let opt = Opt::parse();
 
     // Setup logging & RUST_LOG from args
     if std::env::var("RUST_LOG").is_err() {
@@ -64,7 +64,7 @@ async fn main() {
         // allow requests from any origin
         .allow_origin(Any);
 
-    let app: Router = Router::new()
+    let app = Router::new()
         .route("/api/diff", post(diff))
         .merge(SpaRouter::new("/assets", opt.static_dir))
         .layer(
@@ -73,7 +73,7 @@ async fn main() {
                 .layer(cors),
         );
 
-    let sock_addr: SocketAddr = SocketAddr::from((
+    let sock_addr = SocketAddr::from((
         IpAddr::from_str(opt.addr.as_str()).unwrap_or(IpAddr::V6(Ipv6Addr::UNSPECIFIED)),
         opt.port,
     ));
@@ -99,23 +99,23 @@ struct DiffResult {
 }
 
 async fn diff(Json(payload): Json<Diff>) -> Result<Json<DiffResult>, AppError> {
-    let before_png: reqwest::Response = reqwest::get(payload.before_png).await?;
+    let before_png = reqwest::get(payload.before_png).await?;
     let before_png_raw_data = before_png.bytes().await?;
-    let before: DynamicImage = Reader::new(Cursor::new(before_png_raw_data))
+    let before = Reader::new(Cursor::new(before_png_raw_data))
         .with_guessed_format()
         .expect("Cursor io never fails")
         .decode()?;
 
-    let after_png: reqwest::Response = reqwest::get(payload.after_png).await?;
+    let after_png = reqwest::get(payload.after_png).await?;
     let after_png_raw_data = after_png.bytes().await?;
-    let after: DynamicImage = Reader::new(Cursor::new(after_png_raw_data))
+    let after = Reader::new(Cursor::new(after_png_raw_data))
         .with_guessed_format()
         .expect("Cursor io never fails")
         .decode()?;
 
-    let result: DynamicImage = lcs_png_diff::diff(&before, &after).unwrap();
+    let result = lcs_png_diff::diff(&before, &after).unwrap();
 
-    let result_file: String = format!("{}{}{}", "assets/", Uuid::new_v4(), ".png");
+    let result_file = format!("{}{}{}", "assets/", Uuid::new_v4(), ".png");
 
     result.save(&result_file)?;
 
@@ -127,7 +127,7 @@ async fn diff(Json(payload): Json<Diff>) -> Result<Json<DiffResult>, AppError> {
         result_file
     );
 
-    let host_info: String = env::var("HOST_INFO").unwrap_or(String::from("http://localhost:8080/"));
+    let host_info = env::var("HOST_INFO").unwrap_or("http://localhost:8080/".to_string());
 
     Ok(Json(DiffResult {
         result_url: format!("{}{}", host_info, result_file),
@@ -143,21 +143,21 @@ enum AppError {
 
 impl From<reqwest::Error> for AppError {
     fn from(inner: reqwest::Error) -> Self {
-        log::error!("{}{}{} {}", '\u{203C}', '\u{203C}', '\u{203C}', inner);
+        log::error!("{}{}{} {}", '\u{2757}', '\u{2757}', '\u{2757}', inner);
         AppError::InputNotFound
     }
 }
 
 impl From<ImageError> for AppError {
     fn from(inner: ImageError) -> Self {
-        log::error!("{}{}{} {}", '\u{203C}', '\u{203C}', '\u{203C}', inner);
+        log::error!("{}{}{} {}", '\u{2757}', '\u{2757}', '\u{2757}', inner);
         AppError::UnsupportedBitmapFormat
     }
 }
 
 impl From<Box<dyn Error>> for AppError {
     fn from(inner: Box<dyn Error>) -> Self {
-        log::error!("{}{}{} {}", '\u{203C}', '\u{203C}', '\u{203C}', inner);
+        log::error!("{}{}{} {}", '\u{2757}', '\u{2757}', '\u{2757}', inner);
         AppError::UnknownError
     }
 }
@@ -173,7 +173,7 @@ impl IntoResponse for AppError {
             AppError::UnknownError => (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error"),
         };
 
-        let body: Json<Value> = Json(json!({
+        let body = Json(json!({
             "error": error_message,
         }));
 
