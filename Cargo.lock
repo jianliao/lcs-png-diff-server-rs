@@ -633,9 +633,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "lcs-png-diff"
-version = "0.1.1"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7bfd0ea3b6451b58f65a04cdef7cefd2fcdb108bc5a3de0112a2989a9f985dcd"
+checksum = "a2d57be9487583f9e95670db92a12b633e25e0d722d4097b6b0566bde68ce595"
 dependencies = [
  "base64",
  "clap",
